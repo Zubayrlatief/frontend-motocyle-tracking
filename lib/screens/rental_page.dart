@@ -5,7 +5,17 @@ class RentalPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Rental Page")),
-      body: Center(child: Text("This is the Rental Page")),
+      body: Column(
+        children: [
+          Text("This is the Rental Page"),
+          ElevatedButton(
+            onPressed: () {
+              // Implement bike adding functionality later
+            },
+            child: Text("Add a Motorcycle (For Renters)"),
+          ),
+        ],
+      ),
     );
   }
 }
