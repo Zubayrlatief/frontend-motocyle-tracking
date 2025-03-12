@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend_motocycle_tracking/screens/home_screen.dart'; // Ensure this import is correct
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
