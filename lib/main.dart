@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'services/api_service.dart'; // Adjust the path if needed
 import 'screens/home_screen.dart';  // Ensure this import is correct
 import 'screens/admin_page.dart'; 
 import 'screens/login_screen.dart';
@@ -19,15 +20,23 @@ class MyApp extends StatelessWidget {
       title: 'Motorcycle Tracking App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        // You can customize the primary color scheme here
+        primarySwatch: Colors.deepPurple,
       ),
-      initialRoute: '/',  // Default route
+      initialRoute: '/',  // Default route to the HomeScreen
       routes: {
-        '/': (context) => const HomeScreen(),  // Make sure this references the correct widget
+        '/': (context) => HomeScreen(token: '',),  // Make sure this references the correct widget
         '/admin': (context) => AdminPage(),
         '/login': (context) => LoginScreen(),
-        '/register': (context) => RegisterScreen(),
         '/rental': (context) => RentalPage(),
       },
+      // You can also add a navigator observer here if you plan on handling routing more extensively
     );
   }
+}
+
+class LoginScreen {
+}
+
+class RegisterScreen {
 }

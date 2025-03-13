@@ -29,44 +29,56 @@ class _NavbarState extends State<Navbar> {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      title: Text("Motorcycle App"),
-      actions: [
-        // If the user is logged in, show the profile and admin (if admin)
-        if (isLoggedIn) ...[
-          if (isAdmin)
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(kToolbarHeight), // Standard AppBar height
+      child: AppBar(
+        title: const Text(
+          "Motorcycle App",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor: Colors.lightBlueAccent,
+        elevation: 5,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(15)),
+        ),
+        actions: [
+          if (isLoggedIn) ...[
+            if (isAdmin)
+              IconButton(
+                icon: const Icon(Icons.admin_panel_settings, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdminPage()),
+                  );
+                },
+              ),
             IconButton(
-              icon: Icon(Icons.admin_panel_settings), // Admin icon
+              icon: const Icon(Icons.person, color: Colors.white),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AdminPage()), // Navigate to AdminPage
-                );
+                // Navigate to profile page
               },
             ),
-          IconButton(
-            icon: Icon(Icons.person), // Profile icon
-            onPressed: () {
-              // Navigate to profile page
-            },
-          ),
-        ]
-        // If the user is not logged in, show login and register options
-        else ...[
-          IconButton(
-            icon: Icon(Icons.person_add), // Register icon
-            onPressed: () {
-              Navigator.pushNamed(context, '/register'); // Navigate to Register page
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.login), // Login icon
-            onPressed: () {
-              Navigator.pushNamed(context, '/login'); // Navigate to Login page
-            },
-          ),
+          ] else ...[
+            IconButton(
+              icon: const Icon(Icons.person_add, color: Colors.white),
+              onPressed: () {
+                Navigator.pushNamed(context, '/register');
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.login, color: Colors.white),
+              onPressed: () {
+                Navigator.pushNamed(context, '/login');
+              },
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

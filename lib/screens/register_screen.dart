@@ -1,40 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:frontend_motocycle_tracking/services/auth_service.dart';
-import 'login_screen.dart';
+import 'package:frontend_motocycle_tracking/services/api_service.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
-
+class RegisterPage extends StatefulWidget {
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  String selectedRole = 'user'; // Default role
-  final AuthService authService = AuthService();
+class _RegisterPageState extends State<RegisterPage> {
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  String _role = 'driver';
+  String _message = '';
 
-  void register() async {
-    bool success = await authService.register(
-      firstNameController.text,
-      lastNameController.text,
-      emailController.text,
-      passwordController.text,
-      selectedRole,
-    );
-
-    if (success) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+  Future<void> register() async {
+    try {
+      final response = await ApiService.registerUser(
+        _firstNameController.text,
+        _lastNameController.text,
+        _emailController.text,
+        _passwordController.text,
+        _role,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Registration failed. Try again.")),
-      );
+      setState(() {
+        _message = response['message'];
+      });
+      // Navigate to login page or other page after registration
+    } catch (e) {
+      setState(() {
+        _message = 'Error: $e';
+      });
     }
   }
 
@@ -43,27 +39,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(title: Text("Register")),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(controller: firstNameController, decoration: InputDecoration(labelText: "First Name")),
-            TextField(controller: lastNameController, decoration: InputDecoration(labelText: "Last Name")),
-            TextField(controller: emailController, decoration: InputDecoration(labelText: "Email")),
-            TextField(controller: passwordController, decoration: InputDecoration(labelText: "Password"), obscureText: true),
+            TextField(
+              controller: _firstNameController,
+              decoration: InputDecoration(labelText: 'First Name'),
+            ),
+            TextField(
+              controller: _lastNameController,
+              decoration: InputDecoration(labelText: 'Last Name'),
+            ),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
             DropdownButton<String>(
-              value: selectedRole,
-              onChanged: (newRole) {
+              value: _role,
+              onChanged: (String? newValue) {
                 setState(() {
-                  selectedRole = newRole!;
+                  _role = newValue!;
                 });
               },
-              items: [
-                DropdownMenuItem(value: 'user', child: Text("Regular User")),
-                DropdownMenuItem(value: 'renter', child: Text("Renter")),
-              ],
+              items: <String>['driver', 'renter']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: register, child: Text("Register")),
+            ElevatedButton(
+              onPressed: register,
+              child: Text('Register'),
+            ),
+            if (_message.isNotEmpty)
+              Text(
+                _message,
+                style: TextStyle(color: Colors.red),
+              ),
           ],
         ),
       ),
