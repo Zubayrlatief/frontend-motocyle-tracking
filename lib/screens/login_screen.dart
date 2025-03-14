@@ -1,38 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:frontend_motocycle_tracking/services/api_service.dart';
-import 'home_screen.dart';  // Navigate to HomePage or Dashboard
+import '../services/api_service.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
+class LoginScreen extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  String _message = '';
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  Future<void> login() async {
-    try {
-      final response = await ApiService.loginUser(
-        _emailController.text,
-        _passwordController.text,
-      );
-      String token = response['token'];
-      setState(() {
-        _message = response['message'];
-      });
-      // Store the token securely (e.g., using `flutter_secure_storage` package)
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
-      );
-    } catch (e) {
-      setState(() {
-        _message = 'Error: $e';
-      });
+  void _login() async {
+    final response = await ApiService.loginUser(_emailController.text, _passwordController.text);
+
+    if (response.containsKey("token")) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login successful!")));
+      Navigator.pushNamed(context, '/home'); // Redirect to home
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login failed: ${response["msg"]}")));
     }
   }
 
@@ -41,28 +26,13 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(title: Text("Login")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            ElevatedButton(
-              onPressed: login,
-              child: Text('Login'),
-            ),
-            if (_message.isNotEmpty)
-              Text(
-                _message,
-                style: TextStyle(color: Colors.red),
-              ),
+            TextField(controller: _emailController, decoration: InputDecoration(labelText: "Email")),
+            TextField(controller: _passwordController, decoration: InputDecoration(labelText: "Password"), obscureText: true),
+            SizedBox(height: 20),
+            ElevatedButton(onPressed: _login, child: Text("Login")),
           ],
         ),
       ),
