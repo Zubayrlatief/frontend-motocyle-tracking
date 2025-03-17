@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -7,58 +8,69 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  String _selectedRole = "driver"; // Default role
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  int roleID = 1; // Default to Renter
 
-  void _register() async {
-    final response = await ApiService.registerUser(
-      _firstNameController.text,
-      _lastNameController.text,
-      _emailController.text,
-      _passwordController.text,
-      _selectedRole,
+  Future<void> registerUser() async {
+    final url = Uri.parse('http://localhost:5000/users');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'firstName': firstNameController.text,
+        'lastName': lastNameController.text,
+        'email': emailController.text,
+        'password': passwordController.text,
+        'roleID': roleID
+      }),
     );
 
-    if (response["status"] == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Registration successful!")));
-      Navigator.pushNamed(context, '/login');
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data['msg'])),
+      );
+      Navigator.pushReplacementNamed(context, '/login');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Registration failed: ${response["msg"]}")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data['msg'] ?? 'Registration failed')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Register")),
+      appBar: AppBar(title: Text('Register')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: _firstNameController, decoration: InputDecoration(labelText: "First Name")),
-            TextField(controller: _lastNameController, decoration: InputDecoration(labelText: "Last Name")),
-            TextField(controller: _emailController, decoration: InputDecoration(labelText: "Email")),
-            TextField(controller: _passwordController, decoration: InputDecoration(labelText: "Password"), obscureText: true),
-
-            // Role Dropdown (Driver or Renter)
-            DropdownButtonFormField<String>(
-              value: _selectedRole,
-              items: ["driver", "renter"].map((role) {
-                return DropdownMenuItem(value: role, child: Text(role.toUpperCase()));
-              }).toList(),
+            TextField(controller: firstNameController, decoration: InputDecoration(labelText: 'First Name')),
+            TextField(controller: lastNameController, decoration: InputDecoration(labelText: 'Last Name')),
+            TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
+            TextField(controller: passwordController, decoration: InputDecoration(labelText: 'Password'), obscureText: true),
+            DropdownButton<int>(
+              value: roleID,
               onChanged: (value) {
                 setState(() {
-                  _selectedRole = value!;
+                  roleID = value!;
                 });
               },
-              decoration: InputDecoration(labelText: "Select Role"),
+              items: [
+                DropdownMenuItem(value: 1, child: Text('Renter')),
+                DropdownMenuItem(value: 2, child: Text('Driver')),
+              ],
             ),
-
             SizedBox(height: 20),
-            ElevatedButton(onPressed: _register, child: Text("Register")),
+            ElevatedButton(onPressed: registerUser, child: Text('Register')),
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, '/login'),
+              child: Text("Already have an account? Login"),
+            ),
           ],
         ),
       ),

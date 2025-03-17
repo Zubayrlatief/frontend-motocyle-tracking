@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../screens/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -7,32 +10,54 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-  void _login() async {
-    final response = await ApiService.loginUser(_emailController.text, _passwordController.text);
+  Future<void> loginUser() async {
+    final url = Uri.parse('http://localhost:5000/login');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': emailController.text,
+        'password': passwordController.text,
+      }),
+    );
 
-    if (response.containsKey("token")) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login successful!")));
-      Navigator.pushNamed(context, '/home'); // Redirect to home
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200 && data['token'] != null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', data['token']);
+      await prefs.setInt('roleID', data['result']['roleID']); // Save role
+
+      // Navigate to home screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login failed: ${response["msg"]}")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data['msg'] ?? 'Login failed')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Login")),
+      appBar: AppBar(title: Text('Login')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: _emailController, decoration: InputDecoration(labelText: "Email")),
-            TextField(controller: _passwordController, decoration: InputDecoration(labelText: "Password"), obscureText: true),
+            TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
+            TextField(controller: passwordController, decoration: InputDecoration(labelText: 'Password'), obscureText: true),
             SizedBox(height: 20),
-            ElevatedButton(onPressed: _login, child: Text("Login")),
+            ElevatedButton(onPressed: loginUser, child: Text('Login')),
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, '/register'),
+              child: Text("Don't have an account? Register"),
+            ),
           ],
         ),
       ),
