@@ -1,32 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../models/motorcycle.dart';
+import '../services/motorcycle_service.dart';
 
-class AddMotorcycle extends StatefulWidget {
+class AddMotorcycleScreen extends StatefulWidget {
   @override
-  _AddMotorcycleState createState() => _AddMotorcycleState();
+  _AddMotorcycleScreenState createState() => _AddMotorcycleScreenState();
 }
 
-class _AddMotorcycleState extends State<AddMotorcycle> {
-  final TextEditingController makeController = TextEditingController();
-  final TextEditingController modelController = TextEditingController();
-  final TextEditingController yearController = TextEditingController();
-  final TextEditingController rateController = TextEditingController();
+class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _service = MotorcycleService();
+  final _makeController = TextEditingController();
+  final _modelController = TextEditingController();
+  final _yearController = TextEditingController();
+  final _rateController = TextEditingController();
+  final _engineController = TextEditingController();
 
-  Future<void> addMotorcycle() async {
-    final response = await http.post(
-      Uri.parse("http://localhost:5000/motorcycles"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "make": makeController.text,
-        "model": modelController.text,
-        "bike_year": int.parse(yearController.text),
-        "rental_rate_per_week": rateController.text,
-        "rental_status": "available",
-        "owner_id": 1
-      }),
-    );
-    if (response.statusCode == 200) {
+  void _submit() async {
+    if (_formKey.currentState!.validate()) {
+      final motorcycle = Motorcycle(
+        bikeId: 0,
+        make: _makeController.text,
+        model: _modelController.text,
+        bikeYear: int.parse(_yearController.text),
+        rentalRate: _rateController.text,
+        engineCC: _engineController.text,
+        rentalStatus: "available",
+        ownerId: 1, // Replace with actual owner ID
+      );
+      await _service.addMotorcycle(motorcycle);
       Navigator.pop(context);
     }
   }
@@ -35,16 +37,15 @@ class _AddMotorcycleState extends State<AddMotorcycle> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Add Motorcycle")),
-      body: Padding(
-        padding: EdgeInsets.all(16),
+      body: Form(
+        key: _formKey,
         child: Column(
           children: [
-            TextField(controller: makeController, decoration: InputDecoration(labelText: "Make")),
-            TextField(controller: modelController, decoration: InputDecoration(labelText: "Model")),
-            TextField(controller: yearController, decoration: InputDecoration(labelText: "Year")),
-            TextField(controller: rateController, decoration: InputDecoration(labelText: "Rate per week")),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: addMotorcycle, child: Text("Add Motorcycle")),
+            TextFormField(controller: _makeController, decoration: InputDecoration(labelText: "Make")),
+            TextFormField(controller: _modelController, decoration: InputDecoration(labelText: "Model")),
+            TextFormField(controller: _yearController, decoration: InputDecoration(labelText: "Year")),
+            TextFormField(controller: _rateController, decoration: InputDecoration(labelText: "Rental Rate")),
+            ElevatedButton(onPressed: _submit, child: Text("Add Motorcycle")),
           ],
         ),
       ),
