@@ -1,59 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../widgets/navbar.dart'; // Import the navbar
 
-class HomePage extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
-  List<dynamic> motorcycles = [];
+class _HomeScreenState extends State<HomeScreen> {
+  int roleID = 0;
 
   @override
   void initState() {
     super.initState();
-    fetchMotorcycles();
+    _getUserRole();
   }
 
-  Future<void> fetchMotorcycles() async {
-    final response = await http.get(Uri.parse("http://localhost:5000/motorcycles"));
-    if (response.statusCode == 200) {
-      setState(() {
-        motorcycles = json.decode(response.body)["results"];
-      });
-    }
+  Future<void> _getUserRole() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      roleID = prefs.getInt('roleID') ?? 0;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Motorcycles")),
-      body: motorcycles.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : GridView.builder(
-              padding: EdgeInsets.all(10),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.8,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: motorcycles.length,
-              itemBuilder: (context, index) {
-                var bike = motorcycles[index];
-                return Card(
-                  child: Column(
-                    children: [
-                      Text(bike["make"] + " " + bike["model"]),
-                      Text("Year: ${bike["bike_year"]}"),
-                      Text("Rate: \$${bike["rental_rate_per_week"]}/week"),
-                      Text("Status: ${bike["rental_status"]}"),
-                    ],
-                  ),
-                );
-              },
-            ),
+      appBar: AppBar(title: Text('Home')),
+      drawer: NavBar(), // ✅ Add the NavBar here
+      body: Center(
+        child: Text(
+          roleID == 1 ? 'Welcome, Renter!' : 'Welcome, Driver!',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
     );
   }
 }

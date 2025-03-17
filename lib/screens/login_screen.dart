@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import '../screens/home_screen.dart';
+import '../services/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -28,12 +30,17 @@ class _LoginScreenState extends State<LoginScreen> {
     if (response.statusCode == 200 && data['token'] != null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', data['token']);
-      await prefs.setInt('roleID', data['result']['roleID']); // Save role
+      await prefs.setInt('roleID', data['result']['roleID']);
+
+      print("Saved token: ${data['token']}"); // Debugging
+
+      // Update login state using AuthProvider
+      Provider.of<AuthProvider>(context, listen: false).login(data['token']);
 
       // Navigate to home screen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

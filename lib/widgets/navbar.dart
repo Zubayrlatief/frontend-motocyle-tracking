@@ -1,33 +1,62 @@
 import 'package:flutter/material.dart';
-import '../screens/home_screen.dart';
-import '../screens/profile_page.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_provider.dart';
 
-class NavBar extends StatefulWidget {
-  @override
-  _NavBarState createState() => _NavBarState();
-}
-
-class _NavBarState extends State<NavBar> {
-  int _selectedIndex = 0;
-  final List<Widget> _pages = [HomePage(), ProfilePage()];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
+class NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+    final authProvider = Provider.of<AuthProvider>(context);
+
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+            ),
+            child: Text(
+              'Motorcycle Tracking',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text('Home'),
+            onTap: () {
+              Navigator.pushNamed(context, '/home');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.account_circle),
+            title: Text('Profile'),
+            onTap: () {
+              Navigator.pushNamed(context, '/profile');
+            },
+          ),
+          if (!authProvider.isLoggedIn) ...[
+            ListTile(
+              leading: Icon(Icons.login),
+              title: Text('Login'),
+              onTap: () {
+                Navigator.pushNamed(context, '/login');
+              },
+            ),
+          ] else ...[
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Logout'),
+              onTap: () {
+                authProvider.logout();
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/login', (route) => false);
+              },
+            ),
+          ]
         ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
       ),
     );
   }
