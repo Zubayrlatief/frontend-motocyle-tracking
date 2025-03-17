@@ -10,7 +10,7 @@ void main() {
     routes: {
       '/login': (context) => LoginScreen(),
       '/register': (context) => RegisterScreen(),
-      '/home': (context) => HomeScreen(),
+      '/home': (context) => HomePage(),
     },
   ));
 }

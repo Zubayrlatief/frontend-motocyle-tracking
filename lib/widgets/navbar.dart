@@ -1,53 +1,33 @@
 import 'package:flutter/material.dart';
+import '../screens/home_screen.dart';
+import '../screens/profile_page.dart';
 
-class NavBar extends StatelessWidget {
+class NavBar extends StatefulWidget {
+  @override
+  _NavBarState createState() => _NavBarState();
+}
+
+class _NavBarState extends State<NavBar> {
+  int _selectedIndex = 0;
+  final List<Widget> _pages = [HomePage(), ProfilePage()];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
-            child: Text(
-              'Motorcycle Tracking',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Home'),
-            onTap: () {
-              Navigator.pushNamed(context, '/home');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.account_circle),
-            title: Text('Profile'),
-            onTap: () {
-              Navigator.pushNamed(context, '/profile');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.login),
-            title: Text('Login'),
-            onTap: () {
-              Navigator.pushNamed(context, '/login');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
-            onTap: () {
-              // Implement logout functionality
-            },
-          ),
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Navigate to home screen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
