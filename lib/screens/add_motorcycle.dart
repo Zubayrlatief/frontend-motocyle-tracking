@@ -19,15 +19,14 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       final motorcycle = Motorcycle(
-        bikeId: 0,
         make: _makeController.text,
         model: _modelController.text,
         bikeYear: int.parse(_yearController.text),
-        rentalRate: _rateController.text,
+        rentalRate: double.parse(_rateController.text), // Convert properly
         engineCC: _engineController.text,
         rentalStatus: "available",
-        ownerId: 1, // Replace with actual owner ID
       );
+
       await _service.addMotorcycle(motorcycle);
       Navigator.pop(context);
     }
@@ -39,14 +38,41 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
       appBar: AppBar(title: Text("Add Motorcycle")),
       body: Form(
         key: _formKey,
-        child: Column(
-          children: [
-            TextFormField(controller: _makeController, decoration: InputDecoration(labelText: "Make")),
-            TextFormField(controller: _modelController, decoration: InputDecoration(labelText: "Model")),
-            TextFormField(controller: _yearController, decoration: InputDecoration(labelText: "Year")),
-            TextFormField(controller: _rateController, decoration: InputDecoration(labelText: "Rental Rate")),
-            ElevatedButton(onPressed: _submit, child: Text("Add Motorcycle")),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _makeController,
+                decoration: InputDecoration(labelText: "Make"),
+                validator: (value) => value!.isEmpty ? "Enter make" : null,
+              ),
+              TextFormField(
+                controller: _modelController,
+                decoration: InputDecoration(labelText: "Model"),
+                validator: (value) => value!.isEmpty ? "Enter model" : null,
+              ),
+              TextFormField(
+                controller: _yearController,
+                decoration: InputDecoration(labelText: "Year"),
+                keyboardType: TextInputType.number,
+                validator: (value) => value!.isEmpty ? "Enter year" : null,
+              ),
+              TextFormField(
+                controller: _rateController,
+                decoration: InputDecoration(labelText: "Rental Rate"),
+                keyboardType: TextInputType.number,
+                validator: (value) => value!.isEmpty ? "Enter rate" : null,
+              ),
+              TextFormField(
+                controller: _engineController,
+                decoration: InputDecoration(labelText: "Engine CC"),
+                validator: (value) => value!.isEmpty ? "Enter engine CC" : null,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(onPressed: _submit, child: Text("Add Motorcycle")),
+            ],
+          ),
         ),
       ),
     );
